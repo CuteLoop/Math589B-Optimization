@@ -1,0 +1,34 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Cython compiled shared libraries and extensions
+*.so
+*.pyd
+*.dll
+*.dylib
+
+# Distribution / packaging
+build/
+dist/
+*.egg-info/
+
+# Virtual environment directories
+venv/
+.env/
+ENV/
+env/
+
+# C/C++ object files and temporary files
+*.o
+*.obj
+*.exe
+
+# Logs and temporary files
+
+tmp/
+
+# OS-specific files
+.DS_Store
+Thumbs.db

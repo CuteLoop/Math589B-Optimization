@@ -1,0 +1,12 @@
+2025-02-02 09:42:21,891 - runtime - INFO - [OptimizeProtein] Total runtime: 0.5687 seconds. n_beads=10
+2025-02-02 09:42:25,702 - runtime - INFO - [OptimizeProtein] Total runtime: 0.4158 seconds. n_beads=10
+2025-02-02 09:42:26,068 - runtime - INFO - [OptimizeProtein] Total runtime: 0.3634 seconds. n_beads=10
+2025-02-02 09:42:26,394 - runtime - INFO - [OptimizeProtein] Total runtime: 0.3249 seconds. n_beads=10
+2025-02-02 09:42:26,752 - runtime - INFO - [OptimizeProtein] Total runtime: 0.3542 seconds. n_beads=10
+2025-02-02 09:42:27,100 - runtime - INFO - [OptimizeProtein] Total runtime: 0.3452 seconds. n_beads=10
+2025-02-02 09:42:27,441 - runtime - INFO - [OptimizeProtein] Total runtime: 0.3399 seconds. n_beads=10
+2025-02-02 09:42:27,759 - runtime - INFO - [OptimizeProtein] Total runtime: 0.3156 seconds. n_beads=10
+2025-02-02 09:42:28,087 - runtime - INFO - [OptimizeProtein] Total runtime: 0.3266 seconds. n_beads=10
+2025-02-02 09:42:28,406 - runtime - INFO - [OptimizeProtein] Total runtime: 0.3174 seconds. n_beads=10
+2025-02-02 09:42:28,720 - runtime - INFO - [OptimizeProtein] Total runtime: 0.3198 seconds. n_beads=10
+2025-02-02 10:17:42,528 - runtime - INFO - [OptimizeProtein] Total runtime: 399.5216 seconds. n_beads=100
