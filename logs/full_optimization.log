@@ -1,0 +1,2 @@
+2025-02-02 13:24:28,950 - runtime - INFO - [ProteinEnergy_Optimization] Total runtime: 0.3936 seconds. n_beads=10
+2025-02-02 13:25:44,302 - runtime - INFO - [ProteinEnergy_Optimization] Total runtime: 31.2329 seconds. n_beads=100

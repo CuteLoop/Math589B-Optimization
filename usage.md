@@ -15,3 +15,6 @@ py protein_folding_3d.py
 ### run cython version (using scipy's minimize for BFGS)
  py -m cython.protein_folding_3d
 
+### run just cython version with implemented BFGS
+ py -m cython.protein_folding_3d
+

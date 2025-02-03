@@ -97,7 +97,7 @@ def animate_optimization(trajectory, interval=100):
 
 if __name__ == "__main__":
     # Set test parameters
-    n_beads = 10      # Try 10, 100, or 500 for benchmarking.
+    n_beads = 100      # Try 10, 100, or 500 for benchmarking.
     dimension = 3
 
     # Initialize protein configuration

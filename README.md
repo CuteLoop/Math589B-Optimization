@@ -21,49 +21,21 @@ Our goal is to optimize the protein configuration by finding a local minimum of 
 
 ## Methodology
 
-We developed two implementations:
+See Usage.md for instructions on how to run code.
+
+We developed 3 implementations:
 
 1. **Vanilla Python + SciPy:**  
-   - All energy computations (bond and Lennard-Jones) are implemented in pure Python using NumPy.
-   - SciPy’s `minimize` function (with the BFGS method) is used for optimization.
-   - This implementation is straightforward but exhibits slower performance due to Python’s overhead in the inner loops.
+   10 particles average: 4.22 s
+   
 
 2. **Cython + SciPy:**  
-   - Performance-critical functions (e.g., `total_energy`, `lennard_jones_potential`, and `bond_potential`) have been reimplemented in Cython.
-   - These Cython routines use C-level type declarations and are compiled into C, significantly accelerating the computation.
-   - The optimization is still driven by SciPy’s `minimize`, but it now calls the fast, Cython-accelerated energy functions.
+   10 particles average: o.32 s
+   100 particles average: 399.5216 
 
-## Results
+3. cython self implemented BFGS.
 
-### Vanilla Python + SciPy (unmodified_python.log)
 
-For a test case with 10 beads, our runtime logs are as follows (sample entries):
-
-```
-2025-02-02 09:41:25,629 - runtime - INFO - [OptimizeProtein] Total runtime: 3.9961 seconds. n_beads=10 
-2025-02-02 09:41:32,703 - runtime - INFO - [OptimizeProtein] Total runtime: 3.8540 seconds. n_beads=10
-2025-02-02 09:41:37,072 - runtime - INFO - [OptimizeProtein] Total runtime: 4.3651 seconds. n_beads=10
-...
-2025-02-02 09:42:11,357 - runtime - INFO - [OptimizeProtein] Total runtime: 4.1857 seconds. n_beads=10
-```
-
-These logs indicate that the vanilla Python implementation takes roughly **4 seconds** per optimization run.
-
-### Cython + SciPy (cython_scipy.log)
-
-For the same test case (10 beads), the runtime logs for the Cython-accelerated implementation are:
-
-```
-2025-02-02 09:42:21,891 - runtime - INFO - [OptimizeProtein] Total runtime: 0.5687 seconds. n_beads=10
-2025-02-02 09:42:25,702 - runtime - INFO - [OptimizeProtein] Total runtime: 0.4158 seconds. n_beads=10
-2025-02-02 09:42:26,068 - runtime - INFO - [OptimizeProtein] Total runtime: 0.3634 seconds. n_beads=10
-...
-2025-02-02 09:42:28,720 - runtime - INFO - [OptimizeProtein] Total runtime: 0.3198 seconds. n_beads=10
-```
-
-These results show that the Cython-enhanced version completes in approximately **0.32 to 0.57 seconds** per run—roughly an **8-fold improvement** in speed.
-
-## Conclusion
 
 Our experiments clearly demonstrate that optimizing the performance-critical parts of the protein folding code with Cython leads to a significant runtime improvement. While the pure Python implementation using SciPy requires about 4 seconds per optimization run for a 10-bead system, the Cython-enhanced version reduces this time to under 0.6 seconds. This improvement not only validates our approach but also suggests that scaling to larger systems (e.g., 100 or 500 beads) would be considerably more efficient using Cython.
 
