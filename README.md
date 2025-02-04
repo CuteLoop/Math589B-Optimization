@@ -1,6 +1,3 @@
-Below is an example of a brief report section that documents your work, including an introduction to the problem and a summary of your findings based on the logs you provided.
-
----
 
 # Protein Folding Optimization Project Report
 
@@ -8,14 +5,13 @@ Below is an example of a brief report section that documents your work, includin
 
 Protein folding is the process by which a protein acquires its functional three-dimensional structure. In our simplified model, a protein is represented as a chain of beads in 3D space. The total potential energy of the system is given by
 
-\[
-U_{\text{total}} = \sum_{i=1}^{n-1} k_b \left(\|x_{i+1} - x_i\| - b\right)^2 + \sum_{i=1}^{n}\sum_{j=i+1}^{n} 4\epsilon \left[\left(\frac{\sigma}{\|x_j-x_i\|}\right)^{12} - \left(\frac{\sigma}{\|x_j-x_i\|}\right)^6\right],
-\]
+
+$$ U_{\text{total}} = \sum_{i=1}^{n-1} k_b \left(\|x_{i+1} - x_i\| - b\right)^2 + \sum_{i=1}^{n}\sum_{j=i+1}^{n} 4\epsilon \left[\left(\frac{\sigma}{\|x_j-x_i\|}\right)^{12} - \left(\frac{\sigma}{\|x_j-x_i\|}\right)^6\right],$$
 
 where:
-- \(\|x_j-x_i\|\) is the Euclidean distance between bead \(i\) and bead \(j\),
-- \(k_b\) is the bond stiffness constant and \(b\) is the equilibrium bond length,
-- \(\epsilon\) and \(\sigma\) characterize the depth and zero-crossing distance of the Lennard-Jones potential.
+- $\|x_j-x_i\|$ is the Euclidean distance between bead $i$ and bead $j$,
+- $k_b $ is the bond stiffness constant and $b$ is the equilibrium bond length,
+- $\epsilon$ and $\sigma $ characterize the depth and zero-crossing distance of the Lennard-Jones potential.
 
 Our goal is to optimize the protein configuration by finding a local minimum of this energy function. We use the BFGS optimization algorithm provided by SciPy.
 
