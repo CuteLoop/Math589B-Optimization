@@ -10,8 +10,8 @@ $$ U_{\text{total}} = \sum_{i=1}^{n-1} k_b \left(\|x_{i+1} - x_i\| - b\right)^2 
 
 where:
 - $\|x_j-x_i\|$ is the Euclidean distance between bead $i$ and bead $j$,
-- $k_b $ is the bond stiffness constant and $b$ is the equilibrium bond length,
-- $\epsilon$ and $\sigma $ characterize the depth and zero-crossing distance of the Lennard-Jones potential.
+- $k_b$ is the bond stiffness constant and $b$ is the equilibrium bond length,
+- $\epsilon$ and $\sigma$ characterize the depth and zero-crossing distance of the Lennard-Jones potential.
 
 Our goal is to optimize the protein configuration by finding a local minimum of this energy function. We use the BFGS optimization algorithm provided by SciPy.
 
@@ -31,8 +31,3 @@ We developed 3 implementations:
 
 3. cython self implemented BFGS.
 
-
-
-Our experiments clearly demonstrate that optimizing the performance-critical parts of the protein folding code with Cython leads to a significant runtime improvement. While the pure Python implementation using SciPy requires about 4 seconds per optimization run for a 10-bead system, the Cython-enhanced version reduces this time to under 0.6 seconds. This improvement not only validates our approach but also suggests that scaling to larger systems (e.g., 100 or 500 beads) would be considerably more efficient using Cython.
-
-This project illustrates the benefit of combining Python's ease of development with Cython's ability to deliver near-C performance for computationally intensive tasks.
