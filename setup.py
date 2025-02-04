@@ -4,10 +4,10 @@ import numpy as np
 
 extensions = [
     Extension(
-        name="protein_cython",           # This will be the module name (protein_cython.so)
-        sources=["protein_cython.pyx"],    # The Cython source file
-        include_dirs=[np.get_include()],   # Include NumPy headers if needed
-        extra_compile_args=["-O3"],         # Optimize for speed
+        name="protein_cython",          # This is the module name (protein_cython.so)
+        sources=["protein_cython.pyx"],   # Your Cython source file
+        include_dirs=[np.get_include()],  # Include NumPy headers if needed
+        extra_compile_args=["-O3"],        # Optimize for speed
     )
 ]
 
