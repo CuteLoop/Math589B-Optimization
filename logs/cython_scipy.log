@@ -13,3 +13,4 @@
 2025-02-02 18:41:14,184 - runtime - INFO - [OptimizeProtein] Total runtime: 0.4552 seconds. n_beads=10
 2025-02-02 18:54:11,513 - runtime - INFO - [OptimizeProtein] Total runtime: 0.4741 seconds. n_beads=10
 2025-02-02 20:53:13,052 - runtime - INFO - [OptimizeProtein] Total runtime: 384.6577 seconds. n_beads=100
+2025-02-04 14:39:39,428 - runtime - INFO - [OptimizeProtein] Total runtime: 0.5919 seconds. n_beads=10
