@@ -3,94 +3,20 @@ from scipy.optimize import minimize
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 from matplotlib.animation import FuncAnimation
-
 import time
-
 # Import the timing function from utils.py
 from utils import time_function, log_runtime, setup_logger, logging
 
-# Initialize protein positions
-def initialize_protein(n_beads, dimension=3, fudge = 1e-5):
-    """
-    Initialize a protein with `n_beads` arranged almost linearly in `dimension`-dimensional space.
-    The `fudge` is a factor that, if non-zero, adds a spiral structure to the configuration.
-    """
-    positions = np.zeros((n_beads, dimension))
-    for i in range(1, n_beads):
-        positions[i, 0] = positions[i-1, 0] + 1  # Fixed bond length of 1 unit
-        positions[i, 1] = fudge * np.sin(i)  # Fixed bond length of 1 unit
-        positions[i, 2] = fudge * np.sin(i*i)  # Fixed bond length of 1 unit                
-    return positions
 
-# Lennard-Jones potential function
-def lennard_jones_potential(r, epsilon=1.0, sigma=1.0):
-    """
-    Compute Lennard-Jones potential between two beads.
-    """
-    return 4 * epsilon * ((sigma / r)**12 - (sigma / r)**6)
 
-# Bond potential function
-def bond_potential(r, b=1.0, k_b=100.0):
-    """
-    Compute harmonic bond potential between two bonded beads.
-    """
-    return k_b * (r - b)**2
+# Import our Cython functions
+from .protein_cython import initialize_protein, total_energy, lennard_jones_potential, bond_potential
 
-# Total energy function
-def total_energy(positions, n_beads, epsilon=1.0, sigma=1.0, b=1.0, k_b=100.0):
-    """
-    Compute the total energy of the protein conformation.
-    """
-    positions = positions.reshape((n_beads, -1))
-    energy = 0.0
-
-    # Bond energy
-    for i in range(n_beads - 1):
-        r = np.linalg.norm(positions[i+1] - positions[i])
-        energy += bond_potential(r, b, k_b)
-
-    # Lennard-Jones potential for non-bonded interactions
-    for i in range(n_beads):
-        for j in range(i+1, n_beads):
-            r = np.linalg.norm(positions[i] - positions[j])
-            if r > 1e-2:  # Avoid division by zero
-                energy += lennard_jones_potential(r, epsilon, sigma)
-
-    return energy
-
-# Optimization function
+# If needed, you can still use the pure Python optimization routine:
 def optimize_protein(positions, n_beads, write_csv=False, maxiter=1000, tol=1e-6):
     """
     Optimize the positions of the protein to minimize total energy.
-
-    Parameters:
-    ----------
-    positions : np.ndarray
-        A 2D NumPy array of shape (n_beads, d) representing the initial
-        positions of the protein's beads in d-dimensional space.
-
-    n_beads : int
-        The number of beads (or units) in the protein model.
-
-    write_csv : bool, optional (default=False)
-        If True, the final optimized positions are saved to a CSV file.
-
-    maxiter : int, optional (default=1000)
-        The maximum number of iterations for the BFGS optimization algorithm.
-
-    tol : float, optional (default=1e-6)
-        The tolerance level for convergence in the optimization.
-
-    Returns:
-    -------
-    result : scipy.optimize.OptimizeResult
-        The result of the optimization process, containing information
-        such as the optimized positions and convergence status.
-
-    trajectory : list of np.ndarray
-        A list of intermediate configurations during the optimization,
-        where each element is an (n_beads, d) array representing the
-        positions of the beads at that step.
+    Uses SciPy's BFGS optimizer and our Cython total_energy function.
     """
     trajectory = []
 
@@ -112,7 +38,6 @@ def optimize_protein(positions, n_beads, write_csv=False, maxiter=1000, tol=1e-6
         csv_filepath = f'protein{n_beads}.csv'
         print(f'Writing data to file {csv_filepath}')
         np.savetxt(csv_filepath, trajectory[-1], delimiter=",")
-
     return result, trajectory
 
 # 3D visualization function
@@ -168,29 +93,31 @@ def animate_optimization(trajectory, interval=100):
 # ------------------------------
 # Main block with runtime benchmarking using time_function
 # ------------------------------
+# Main block with runtime benchmarking using time_function
+# ------------------------------
 
 if __name__ == "__main__":
     # Set test parameters
-    n_beads = 10      # Try 10, 100, or 500 for benchmarking.
+    n_beads = 100      # Try 10, 100, or 500 for benchmarking.
     dimension = 3
 
     # Initialize protein configuration
     initial_positions = initialize_protein(n_beads, dimension)
     
     # Print and plot initial configuration
-    initial_energy = total_energy(initial_positions.flatten(), n_beads)
+    initial_energy = total_energy(initial_positions, n_beads)  # <-- Remove .flatten()
     print("Initial Energy:", initial_energy)
     plot_protein_3d(initial_positions, title="Initial Configuration")
 
     # Benchmark the optimization using the time_function wrapper
     (result, trajectory), elapsed = time_function(optimize_protein, initial_positions, n_beads, write_csv=True)
-    runtime_logger = setup_logger("runtime", "logs/unmodified_python.log", level=logging.INFO)
+    runtime_logger = setup_logger("runtime", "logs/cython_scipy.log", level=logging.INFO)
     log_runtime(runtime_logger, "OptimizeProtein", elapsed, extra=f"n_beads={n_beads}")
     print(f"Optimization completed in {elapsed:.4f} seconds.")
     
     # Process and visualize the optimized configuration
     optimized_positions = result.x.reshape((n_beads, dimension))
-    optimized_energy = total_energy(optimized_positions.flatten(), n_beads)
+    optimized_energy = total_energy(optimized_positions, n_beads)  # Also pass the 2D array here.
     print("Optimized Energy:", optimized_energy)
     plot_protein_3d(optimized_positions, title="Optimized Configuration")
 
@@ -198,15 +125,29 @@ if __name__ == "__main__":
     animate_optimization(trajectory)
 
 
+# ------------------------------
+# Testing Benchmarking: Repeated runs
+# ------------------------------
 
-    #testing benchmarking
+# Set up a single runtime logger for the benchmarking section.
+  #  runtime_logger = setup_logger("runtime", "logs/cython_scipy.log", level=logging.INFO)
+
+
+'''
     for i in range(10):
+        # Initialize protein configuration (2D array)
         initial_positions = initialize_protein(n_beads, dimension)
-    
-         # Print and plot initial configuration
-        initial_energy = total_energy(initial_positions.flatten(), n_beads)
-    
+        
+        # Compute the initial energy using the Cython total_energy function
+        # (Pass the 2D array directly)
+        initial_energy = total_energy(initial_positions, n_beads)
+        print(f"Run {i+1}: Initial Energy: {initial_energy}")
+        
+        # Benchmark the optimization using the time_function wrapper.
+        # Note: The lambda in optimize_protein uses the 2D array as needed.
         (result, trajectory), elapsed = time_function(optimize_protein, initial_positions, n_beads, write_csv=True)
-        runtime_logger = setup_logger("runtime", "logs/unmodified_python.log", level=logging.INFO)
+        
+        # Log the runtime information
         log_runtime(runtime_logger, "OptimizeProtein", elapsed, extra=f"n_beads={n_beads}")
-        print(f"Optimization completed in {elapsed:.4f} seconds.")
+        print(f"Run {i+1}: Optimization completed in {elapsed:.4f} seconds.\n")
+'''
