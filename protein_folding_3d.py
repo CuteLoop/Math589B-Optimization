@@ -59,9 +59,38 @@ def total_energy(positions, n_beads, epsilon=1.0, sigma=1.0, b=1.0, k_b=100.0):
     return energy
 
 # Optimization function
-def optimize_protein(positions, n_beads, write_csv=False):
+def optimize_protein(positions, n_beads, write_csv=False, maxiter=1000, tol=1e-6):
     """
     Optimize the positions of the protein to minimize total energy.
+
+    Parameters:
+    ----------
+    positions : np.ndarray
+        A 2D NumPy array of shape (n_beads, d) representing the initial
+        positions of the protein's beads in d-dimensional space.
+
+    n_beads : int
+        The number of beads (or units) in the protein model.
+
+    write_csv : bool, optional (default=False)
+        If True, the final optimized positions are saved to a CSV file.
+
+    maxiter : int, optional (default=1000)
+        The maximum number of iterations for the BFGS optimization algorithm.
+
+    tol : float, optional (default=1e-6)
+        The tolerance level for convergence in the optimization.
+
+    Returns:
+    -------
+    result : scipy.optimize.OptimizeResult
+        The result of the optimization process, containing information
+        such as the optimized positions and convergence status.
+
+    trajectory : list of np.ndarray
+        A list of intermediate configurations during the optimization,
+        where each element is an (n_beads, d) array representing the
+        positions of the beads at that step.
     """
     trajectory = []
 
@@ -76,7 +105,8 @@ def optimize_protein(positions, n_beads, write_csv=False):
         args=(n_beads,),
         method='BFGS',
         callback=callback,
-        options={'disp': True}
+        tol=tol,
+        options={'maxiter': maxiter, 'disp': True}
     )
     if write_csv:
         csv_filepath = f'protein{n_beads}.csv'
