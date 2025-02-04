@@ -1,0 +1,9 @@
+.PHONY: all clean
+
+# Default target: build the Cython extensions.
+all:
+	python3 setup.py build_ext --inplace
+
+# Clean up generated files and directories.
+clean:
+	rm -rf build *.so *.c *.egg-info
