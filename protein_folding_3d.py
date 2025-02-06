@@ -1,9 +1,10 @@
+import time
 import numpy as np
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 from matplotlib.animation import FuncAnimation
 
-from energy_wrapper import optimize_protein_c, compute_total_energy  # Ensure you import energy computation
+from energy_wrapper import optimize_protein_c, compute_total_energy
 
 def optimize_protein(positions, n_beads, write_csv=False, maxiter=1000, tol=1e-6):
     """
@@ -26,8 +27,8 @@ def initialize_protein(n_beads, dimension=3, fudge=1e-5):
     positions = np.zeros((n_beads, dimension))
     for i in range(1, n_beads):
         positions[i, 0] = positions[i-1, 0] + 1  # Fixed bond length of 1 unit
-        positions[i, 1] = fudge * np.sin(i)  # Small perturbation in y
-        positions[i, 2] = fudge * np.sin(i*i)  # Small perturbation in z               
+        positions[i, 1] = fudge * np.sin(i)       # Small perturbation in y
+        positions[i, 2] = fudge * np.sin(i*i)       # Small perturbation in z               
     return positions
 
 # 3D visualization function
@@ -80,6 +81,9 @@ def animate_optimization(trajectory, interval=100):
 
 # Main function
 if __name__ == "__main__":
+    # Record the start time.
+    
+
     n_beads = 10
     dimension = 3
     maxiter = 1000
@@ -96,10 +100,12 @@ if __name__ == "__main__":
     plot_protein_3d(initial_positions, title="Initial Configuration")
 
     # Optimize
+    start_time = time.time()
     optimized_positions, trajectory = optimize_protein(initial_positions, n_beads, write_csv=True, maxiter=maxiter, tol=tol)
 
     # Compute and print optimized energy
     optimized_energy = compute_total_energy(optimized_positions.flatten())
+    end_time = time.time()
     print(f"Optimized Energy: {optimized_energy}")
 
     # Plot optimized configuration
@@ -108,3 +114,8 @@ if __name__ == "__main__":
     # Animate optimization (only if trajectory tracking is implemented)
     if trajectory:
         animate_optimization(trajectory)
+
+    # Record the end time and compute elapsed time.
+    
+    elapsed = end_time - start_time
+    print(f"Elapsed time: {elapsed:.4f} seconds")

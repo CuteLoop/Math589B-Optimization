@@ -1,0 +1,14 @@
+CC = gcc
+CFLAGS = -shared -Wall -O2 -fPIC
+LDFLAGS = -lm
+TARGET = libbfgs.dll
+SRC = bfgs_w_varargs.c energy.c
+OBJ = $(SRC:.c=.o)
+
+all: $(TARGET)
+
+$(TARGET): $(SRC)
+	$(CC) $(CFLAGS) -o $(TARGET) $(SRC) $(LDFLAGS)
+
+clean:
+	del /F /Q $(TARGET)
