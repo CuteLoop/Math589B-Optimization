@@ -2,32 +2,27 @@ import ctypes
 import numpy as np
 
 # Load the shared library
-lib = ctypes.CDLL('./energy.so')  # Use 'energy.dll' on Windows
+lib = ctypes.CDLL('./libbfgs.so')
 
-# Define function argument and return types
-lib.total_energy.argtypes = [
-    ctypes.POINTER(ctypes.c_double),  # positions
-    ctypes.c_int,                    # n_beads
-    ctypes.c_double,                 # epsilon
-    ctypes.c_double,                 # sigma
-    ctypes.c_double,                 # b
-    ctypes.c_double                  # k_b
+# Define function prototype
+lib.bfgs_optimize.argtypes = [
+    ctypes.POINTER(ctypes.c_double),  # Initial positions
+    ctypes.c_int,                     # Number of beads
+    ctypes.c_int,                     # maxiter
+    ctypes.c_double,                   # tol
+    ctypes.c_double, ctypes.c_double,  # epsilon, sigma
+    ctypes.c_double, ctypes.c_double   # b, k_b
 ]
-lib.total_energy.restype = ctypes.c_double
+lib.bfgs_optimize.restype = None  # No return value
 
-def compute_total_energy(positions, epsilon=1.0, sigma=1.0, b=1.0, k_b=100.0):
+def optimize_protein_c(positions, n_beads, maxiter=1000, tol=1e-6,
+                        epsilon=1.0, sigma=1.0, b=1.0, k_b=100.0):
     """
-    Wrapper function to compute total energy using the C++ library.
+    Call the C implementation of BFGS to optimize the protein positions.
     """
-    n_beads = len(positions) // 3
-    positions_array = np.array(positions, dtype=np.float64)
-    positions_ptr = positions_array.ctypes.data_as(ctypes.POINTER(ctypes.c_double))
-    
-    return lib.total_energy(positions_ptr, n_beads, epsilon, sigma, b, k_b)
+    positions = positions.flatten().astype(np.float64)  # Ensure contiguous double array
+    c_positions = positions.ctypes.data_as(ctypes.POINTER(ctypes.c_double))
 
-# Example usage
-if __name__ == "__main__":
-    n_beads = 10
-    positions = np.random.rand(n_beads * 3)  # Random 3D positions for each bead
-    energy = compute_total_energy(positions)
-    print(f"Total Energy: {energy}")
+    lib.bfgs_optimize(c_positions, n_beads, maxiter, tol, epsilon, sigma, b, k_b)
+
+    return positions.reshape((n_beads, 3))  # Reshape back to original format
