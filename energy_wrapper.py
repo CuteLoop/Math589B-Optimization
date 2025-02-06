@@ -2,7 +2,7 @@ import ctypes
 import numpy as np
 
 # Load the shared library (adjust the filename for your platform)
-lib = ctypes.CDLL('./libbfgs.dll')  # Use 'libbfgs.so' on Linux
+lib = ctypes.CDLL('./libbfgs.so')  # Use 'libbfgs.so' on Linux
 
 # Define the prototype for bfgs_optimize from the library
 lib.bfgs_optimize.argtypes = [
