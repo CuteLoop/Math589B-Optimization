@@ -1,118 +1,70 @@
 import time
 import numpy as np
-import matplotlib.pyplot as plt
-from mpl_toolkits.mplot3d import Axes3D
-from matplotlib.animation import FuncAnimation
-
 from energy_wrapper import optimize_protein_c, compute_total_energy
 
-# Define a simple result class to mimic SciPy's OptimizeResult.
 class OptimizeResult:
+    """Simple result object so the autograder can check result.x."""
     def __init__(self, x):
+        # x should be shape (n_beads,3)
         self.x = x
+
+def initialize_protein(n_beads, dimension=3, fudge=1e-5):
+    """(Do not modify per assignment instructions)"""
+    positions = np.zeros((n_beads, dimension))
+    for i in range(1, n_beads):
+        positions[i, 0] = positions[i - 1, 0] + 1.0
+        if dimension > 1:
+            positions[i, 1] = fudge * np.sin(i)
+        if dimension > 2:
+            positions[i, 2] = fudge * np.sin(i * i)
+    return positions
 
 def optimize_protein(positions, n_beads, write_csv=False, maxiter=1000, tol=1e-6):
     """
-    Optimize the positions of the protein using the C implementation of BFGS.
-    
-    Returns:
-        result: An object with attribute x that holds the optimized positions.
-        trajectory: A list of intermediate configurations (empty if not tracked).
+    Main function called by the autograder. 
+    returns result, trajectory
+    where result.x is shape (n_beads, 3)
     """
-    trajectory = []  # (Empty for now, unless the C code is modified to record a trajectory)
-    optimized_positions = optimize_protein_c(positions, n_beads, maxiter, tol)
+    # 1) Flatten? Not needed. We do it in the wrapper. But let's keep shape consistent:
+    positions_2d = positions.reshape(n_beads, 3)
+
+    # 2) Call the C function through our wrapper
+    optimized_positions = optimize_protein_c(positions_2d, n_beads, maxiter, tol)
+
+    # 3) Optionally save to CSV
     if write_csv:
-        np.savetxt(f'protein{n_beads}.csv', optimized_positions, delimiter=",")
+        np.savetxt(f"protein{n_beads}.csv", optimized_positions, delimiter=",")
+
+    # 4) Build a simple trajectory list (empty for now)
+    trajectory = []
+
+    # 5) Return a result object with .x for the autograder
     result = OptimizeResult(optimized_positions)
     return result, trajectory
 
-def initialize_protein(n_beads, dimension=3, fudge=1e-5):
-    """
-    Initialize a protein with `n_beads` arranged almost linearly in `dimension`-dimensional space.
-    The `fudge` parameter adds a small spiral perturbation.
-    """
-    positions = np.zeros((n_beads, dimension))
-    for i in range(1, n_beads):
-        positions[i, 0] = positions[i-1, 0] + 1  # Fixed bond length of 1 unit
-        positions[i, 1] = fudge * np.sin(i)       # Small perturbation in y
-        positions[i, 2] = fudge * np.sin(i*i)       # Small perturbation in z               
-    return positions
-
-def plot_protein_3d(positions, title="Protein Conformation", ax=None):
-    """
-    Plot the 3D positions of the protein.
-    """
-    if ax is None:
-        fig = plt.figure()
-        ax = fig.add_subplot(111, projection='3d')
-    positions = positions.reshape((-1, 3))
-    ax.plot(positions[:, 0], positions[:, 1], positions[:, 2], '-o', markersize=6)
-    ax.set_title(title)
-    ax.set_xlabel('x')
-    ax.set_ylabel('y')
-    ax.set_zlabel('z')
-    plt.show()
-
-def animate_optimization(trajectory, interval=100):
-    """
-    Animate the protein folding process in 3D with autoscaling.
-    """
-    fig = plt.figure()
-    ax = fig.add_subplot(111, projection='3d')
-    line, = ax.plot([], [], [], '-o', markersize=6)
-
-    def update(frame):
-        positions = trajectory[frame]
-        line.set_data(positions[:, 0], positions[:, 1])
-        line.set_3d_properties(positions[:, 2])
-        # Autoscale the axes.
-        x_min, x_max = positions[:, 0].min(), positions[:, 0].max()
-        y_min, y_max = positions[:, 1].min(), positions[:, 1].max()
-        z_min, z_max = positions[:, 2].min(), positions[:, 2].max()
-        ax.set_xlim(x_min - 1, x_max + 1)
-        ax.set_ylim(y_min - 1, y_max + 1)
-        ax.set_zlim(z_min - 1, z_max + 1)
-        ax.set_title(f"Step {frame + 1}/{len(trajectory)}")
-        return line,
-    
-    ani = FuncAnimation(fig, update, frames=len(trajectory), interval=interval, blit=False)
-    plt.show()
-
-# Main function.
+# -----------------------------------------
+# Optional: local testing code
+# -----------------------------------------
 if __name__ == "__main__":
-    # Record the start time.
-    start_time = time.time()
 
     n_beads = 10
     dimension = 3
     maxiter = 1000
     tol = 1e-6
 
-    # Initialize positions.
-    initial_positions = initialize_protein(n_beads, dimension)
+    # Initialize
+    init_pos = initialize_protein(n_beads, dimension)
     
-    # Compute and print initial energy.
-    initial_energy = compute_total_energy(initial_positions.flatten())
-    print(f"Initial Energy: {initial_energy}")
+    # Print initial energy
+    initial_energy = compute_total_energy(init_pos)
+    print(f"Initial energy: {initial_energy}")
 
-    # Plot initial configuration.
-    plot_protein_3d(initial_positions, title="Initial Configuration")
+    # Run optimization
+    start = time.time()
 
-    # Optimize positions.
-    result, trajectory = optimize_protein(initial_positions, n_beads, write_csv=True, maxiter=maxiter, tol=tol)
-    
-    # Compute and print optimized energy.
-    optimized_energy = compute_total_energy(result.x.flatten())
-    print(f"Optimized Energy: {optimized_energy}")
+    result, traj = optimize_protein(init_pos, n_beads, write_csv=True, maxiter=maxiter, tol=tol)
+    final_energy = compute_total_energy(result.x)
+    print(f"Final energy: {final_energy}")
 
-    # Plot optimized configuration.
-    plot_protein_3d(result.x, title="Optimized Configuration")
-
-    # Animate optimization (only if trajectory tracking is implemented).
-    if trajectory:
-        animate_optimization(trajectory)
-
-    # Record the end time and print elapsed time.
-    end_time = time.time()
-    elapsed = end_time - start_time
+    elapsed = time.time() - start
     print(f"Elapsed time: {elapsed:.4f} seconds")
