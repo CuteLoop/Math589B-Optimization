@@ -22,14 +22,21 @@ def initialize_protein(n_beads, dimension=3, fudge=1e-5):
 def optimize_protein(positions, n_beads, write_csv=False, maxiter=1000, tol=1e-6):
     """
     Main function called by the autograder. 
-    returns result, trajectory
+    returns (result, trajectory)
     where result.x is shape (n_beads, 3)
     """
-    # 1) Flatten? Not needed. We do it in the wrapper. But let's keep shape consistent:
-    positions_2d = positions.reshape(n_beads, 3)
+    # 1) Ensure positions is at least shaped (n_beads, 3)
+    positions_2d = np.asarray(positions, dtype=np.float64).reshape(n_beads, 3)
 
     # 2) Call the C function through our wrapper
     optimized_positions = optimize_protein_c(positions_2d, n_beads, maxiter, tol)
+
+    # Extra assertions to confirm shape and dtype
+    assert isinstance(optimized_positions, np.ndarray), "optimized_positions must be a NumPy array"
+    assert optimized_positions.dtype == np.float64, f"Expected float64 dtype, got {optimized_positions.dtype}"
+    assert optimized_positions.shape == (n_beads, 3), (
+        f"Expected (n_beads, 3), got {optimized_positions.shape}"
+    )
 
     # 3) Optionally save to CSV
     if write_csv:
@@ -52,19 +59,19 @@ if __name__ == "__main__":
     maxiter = 1000
     tol = 1e-6
 
-    # Initialize
+    # 1) Initialize
     init_pos = initialize_protein(n_beads, dimension)
     
-    # Print initial energy
+    # 2) Print initial energy
     initial_energy = compute_total_energy(init_pos)
     print(f"Initial energy: {initial_energy}")
 
-    # Run optimization
+    # 3) Run optimization
     start = time.time()
-
     result, traj = optimize_protein(init_pos, n_beads, write_csv=True, maxiter=maxiter, tol=tol)
     final_energy = compute_total_energy(result.x)
     print(f"Final energy: {final_energy}")
 
+    # 4) Show elapsed time
     elapsed = time.time() - start
     print(f"Elapsed time: {elapsed:.4f} seconds")
