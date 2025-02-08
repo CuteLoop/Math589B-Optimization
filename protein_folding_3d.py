@@ -87,30 +87,22 @@ def optimize_protein(positions, n_beads, write_csv=False, maxiter=1000, tol=1e-6
 # Optional local testing code
 # ----------------------------------------------------
 if __name__ == "__main__":
-    start_time = time.time()
-
     n_beads = 10
-    dimension = 3
-    maxiter = 1000
-    tol = 1e-6
+    positions = np.random.rand(n_beads, 3)
 
-    # Initialize
-    init_pos = initialize_protein(n_beads, dimension)
+    # Call BFGS with Armijo line search (linesearch_choice=0)
+    optimized_positions = optimize_protein_c(positions, n_beads, maxiter=1000, tol=1e-6, linesearch_choice=0)
+    e_armijo = compute_total_energy(optimized_positions)
 
-    # Print initial energy
-    initial_energy = compute_total_energy(init_pos)
-    print(f"Initial Energy: {initial_energy}")
+    # Call BFGS with Wolfe line search (linesearch_choice=1)
+    opt_wolfe = optimize_protein_c(positions, n_beads, maxiter=1000, tol=1e-6, linesearch_choice=1)
+    e_wolfe = compute_total_energy(opt_wolfe)
 
-    # Run optimization
-    result, traj = optimize_protein(init_pos, n_beads, write_csv=True, maxiter=maxiter, tol=tol)
+    # Call BFGS with Strong Wolfe line search (linesearch_choice=2)
+    opt_strong = optimize_protein_c(positions, n_beads, maxiter=1000, tol=1e-6, linesearch_choice=2)
+    e_strong = compute_total_energy(opt_strong)
 
-    # Compute final energy
-    # 'result.x' is shape (3*n_beads,), typical for SciPy => reshape for compute_total_energy
-    final_positions_2d = result.x.reshape((n_beads, dimension))
-    final_energy = compute_total_energy(final_positions_2d)
-    print(f"Final Energy: {final_energy}")
-
-    elapsed = time.time() - start_time
-    print(f"Elapsed time: {elapsed:.4f} seconds")
-
+    print("Armijo final energy:", e_armijo)
+    print("Wolfe final energy :", e_wolfe)
+    print("Strong Wolfe final energy:", e_strong)
     # If you want to do further checks or plotting, do so here.
