@@ -46,7 +46,7 @@ def optimize_protein_c(positions,
                        sigma=1.0,
                        b=1.0,
                        k_b=100.0,
-                       linesearch_choice=1):
+                       linesearch_choice=0):
     """
     Call the (updated) C implementation of BFGS to optimize the protein positions.
 
