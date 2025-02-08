@@ -76,7 +76,7 @@ static double armijo_line_search(const double *x, const double *p, int n,
 {
     double alpha = alpha_init;
     double dotg  = dot_product(grad, p, n);
-    double beta  = 0.5;  // shrink factor
+    double beta  = 0.5;  // shrink factor (unchanged for Armijo)
 
     double *x_new = (double*)malloc(n * sizeof(double));
     if(!x_new){
@@ -110,7 +110,8 @@ static double armijo_line_search(const double *x, const double *p, int n,
 }
 
 // =====================================================================
-// (2) Wolfe (Weak Wolfe) line search with dynamic alpha minimum
+// (2) Wolfe (Weak Wolfe) line search with dynamic alpha minimum,
+// updated to mimic the Python tuning (c1=1e-4, c2=0.9, shrink factor=0.9)
 // =====================================================================
 static double wolfe_line_search(const double *x, const double *p, int n,
                                 double f_x, const double *grad,
@@ -120,8 +121,8 @@ static double wolfe_line_search(const double *x, const double *p, int n,
                                 double min_alpha) // dynamic minimum alpha
 {
     double alpha = alpha_init;
-    double dotg  = dot_product(grad, p, n);    // grad(x)^T * p
-    double shrink = 0.5;  
+    double dotg  = dot_product(grad, p, n);    // p^T * grad(x)
+    double shrink = 0.9;  // Updated shrink factor from 0.5 to 0.9
 
     // Allocate workspace
     double *x_new    = (double*)malloc(n * sizeof(double));
@@ -143,19 +144,19 @@ static double wolfe_line_search(const double *x, const double *p, int n,
         double f_new = objective(x_new, grad_new, n, acopy);
         va_end(acopy);
 
-        // Condition (i) - Armijo
+        // Condition (i): Armijo condition
         if(f_new > f_x + c1 * alpha * dotg) {
             alpha *= shrink;
         } else {
-            // Condition (ii) - Curvature
-            double dotg_new = dot_product(grad_new, p, n); // grad(x+alpha*p)^T * p
-            if(dotg_new < c2 * dotg) {
+            // Condition (ii): Curvature condition: check absolute directional derivative.
+            double dotg_new = dot_product(grad_new, p, n);
+            if(fabs(dotg_new) > fabs(c2 * dotg)){
                 alpha *= shrink;
             } else {
-                break; // success
+                break; // Both conditions satisfied.
             }
         }
-        if(alpha < min_alpha){ // dynamic lower bound check
+        if(alpha < min_alpha){ // enforce dynamic lower bound
             break;
         }
     }
@@ -299,9 +300,9 @@ static double bfgs_line_search_call(LineSearchType ls_choice,
                                     va_list args_in,
                                     double min_alpha) // dynamic minimum alpha
 {
-    // Updated constants: c1 remains 1e-4, c2 is updated from 0.9 to 0.7.
+    // For Wolfe, we now use c1 = 1e-4 and c2 = 0.9.
     double c1 = 1e-4; 
-    double c2 = 0.7;  
+    double c2 = 0.9;  
     double alpha_init = 1.0;
 
     switch(ls_choice){
@@ -417,7 +418,7 @@ static void bfgs_impl(double *x, int n, int max_iters, double tol,
                 yHy += y[i] * Hy[i];
             }
 
-            // Update H: H = H - (s*Hy^T + Hy*s^T)*rho + (1 + y^T*H*y / (y^T*s))*(s*s^T)*rho
+            // Update H: H = H - (s*Hy^T + Hy*s^T)*rho + (1 + y^T*H*y/(y^T*s))*(s*s^T)*rho
             for(int i = 0; i < n; i++){
                 for(int j = 0; j < n; j++){
                     double term1 = -rho * (s[i] * Hy[j] + Hy[i] * s[j]);

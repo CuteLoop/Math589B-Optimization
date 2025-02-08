@@ -31,3 +31,8 @@ We developed 3 implementations:
 
 3. cython self implemented BFGS.
 
+
+4.  C code BFGS with Armijo backtracking.
+
+5. C code BFGS with wolfe conditions.
+
