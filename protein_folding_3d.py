@@ -88,7 +88,7 @@ def optimize_protein(positions, n_beads, write_csv=False, maxiter=1000, tol=1e-6
 # ----------------------------------------------------
 if __name__ == "__main__":
     n_beads = 100
-    positions = np.random.rand(n_beads, 3)
+    positions = initialize_protein(n_beads)
 
     # Call BFGS with Armijo line search (linesearch_choice=0)
 
