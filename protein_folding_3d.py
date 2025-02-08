@@ -87,20 +87,41 @@ def optimize_protein(positions, n_beads, write_csv=False, maxiter=1000, tol=1e-6
 # Optional local testing code
 # ----------------------------------------------------
 if __name__ == "__main__":
-    n_beads = 10
+    n_beads = 100
     positions = np.random.rand(n_beads, 3)
 
     # Call BFGS with Armijo line search (linesearch_choice=0)
+
+    # Start timer
+    start_time = time.time()
     optimized_positions = optimize_protein_c(positions, n_beads, maxiter=1000, tol=1e-6, linesearch_choice=0)
     e_armijo = compute_total_energy(optimized_positions)
+    # End timer
+    end_time = time.time()
+    print(f"Elapsed time (Armijo): {end_time - start_time:.4f} seconds")
+
 
     # Call BFGS with Wolfe line search (linesearch_choice=1)
+    
+    # Start timer
+    start_time = time.time()
     opt_wolfe = optimize_protein_c(positions, n_beads, maxiter=1000, tol=1e-6, linesearch_choice=1)
     e_wolfe = compute_total_energy(opt_wolfe)
+    # End timer
+    end_time = time.time()
+    print(f"Elapsed time (Wolfe): {end_time - start_time:.4f} seconds")
+
+
 
     # Call BFGS with Strong Wolfe line search (linesearch_choice=2)
+
+    # Start timer
+    start_time = time.time()
     opt_strong = optimize_protein_c(positions, n_beads, maxiter=1000, tol=1e-6, linesearch_choice=2)
     e_strong = compute_total_energy(opt_strong)
+    # End timer
+    end_time = time.time()
+    print(f"Elapsed time (Strong Wolfe): {end_time - start_time:.4f} seconds")
 
     print("Armijo final energy:", e_armijo)
     print("Wolfe final energy :", e_wolfe)
