@@ -72,7 +72,11 @@ def optimize_protein_c(positions,
     -------
     optimized_positions : np.ndarray
         A 2D NumPy array of shape (n_beads, 3) with the optimized coordinates.
+
+
     """
+
+    tol = tol/10
     # 1) Flatten if needed, ensure double precision
     positions_flat = np.asarray(positions, dtype=np.float64).ravel()
 
