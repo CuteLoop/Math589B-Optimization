@@ -45,7 +45,7 @@ def optimize_protein(positions, n_beads, write_csv=False, maxiter=1000, tol=1e-6
     # 1) Make sure positions is float64 and shaped (n_beads, 3)
     positions_2d = np.asarray(positions, dtype=np.float64).reshape(n_beads, 3)
 
-    if n_beads >= 50 and tol < 1e-5:
+    if tol <= 1e-4:
         linesearch_choice = 1  # Use Wolfe line search
     else:
         linesearch_choice = 0  # Use Armijo backtracking line search
