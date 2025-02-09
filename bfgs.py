@@ -1,13 +1,4 @@
-#----------------------------------------------------------------
-# File:     bfgs.py
-#----------------------------------------------------------------
-#
-# Author:   Marek Rychlik (rychlik@arizona.edu)
-# Date:     Sat Jan 25 20:17:01 2025
-# Copying:  (C) Marek Rychlik, 2020. All rights reserved.
-# 
-#----------------------------------------------------------------
-# This is the code from the textbook
+
 
 import numpy as np
 

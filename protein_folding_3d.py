@@ -45,12 +45,18 @@ def optimize_protein(positions, n_beads, write_csv=False, maxiter=1000, tol=1e-6
     # 1) Make sure positions is float64 and shaped (n_beads, 3)
     positions_2d = np.asarray(positions, dtype=np.float64).reshape(n_beads, 3)
 
+    if n_beads >= 50 and tol < 1e-5:
+        linesearch_choice = 1  # Use Wolfe line search
+    else:
+        linesearch_choice = 0  # Use Armijo backtracking line search
+
     # 2) Call C-based BFGS via your wrapper
     optimized_positions_2d = optimize_protein_c(
         positions_2d,    # shape (n_beads,3)
         n_beads,
         maxiter=maxiter,
-        tol=tol
+        tol=tol,
+        linesearch_choice=linesearch_choice
     )
     # Ensure shape is correct
     assert optimized_positions_2d.shape == (n_beads, 3), (
@@ -87,8 +93,8 @@ def optimize_protein(positions, n_beads, write_csv=False, maxiter=1000, tol=1e-6
 # Optional local testing code
 # ----------------------------------------------------
 if __name__ == "__main__":
-    n_beads = 10
-    
+    n_beads = 100
+
     positions = initialize_protein(n_beads)
 
     # Call BFGS with Armijo line search (linesearch_choice=0)

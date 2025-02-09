@@ -67,8 +67,3 @@ if __name__ == "__main__":
     print(f"Gradient (Analytical): {grad_analytical}")
     print(f"Gradient (Numerical): {grad_numerical}")
     print(f"Gradient (JAX): {grad_jax}")
-
-
-    print(f"Error (Analytical vs Numerical): {error_num:.6e}")
-    print(f"Error (Analytical vs JAX): {error_jax:.6e}")
-    print(f"Error (Numerical vs JAX): {np.linalg.norm(grad_numerical - grad_jax):.6e}")

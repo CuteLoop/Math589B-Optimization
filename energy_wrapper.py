@@ -46,15 +46,10 @@ def optimize_protein_c(positions,
                        sigma=1.0,
                        b=1.0,
                        k_b=100.0,
-                       # linesearch_choice is now determined automatically
-                       ):
+                       linesearch_choice=1):
     """
     Call the (updated) C implementation of BFGS to optimize the protein positions.
-    
-    The function chooses the type of line search based on the problem size and tolerance:
-      - If n_beads is high (>=50) and tol is small (<1e-5), Wolfe line search is used.
-      - Otherwise, Armijo line search is used.
-    
+
     Parameters
     ----------
     positions : array-like
@@ -67,33 +62,28 @@ def optimize_protein_c(positions,
         Tolerance for gradient norm (default=1e-6).
     epsilon, sigma, b, k_b : floats, optional
         Energy parameters (default=1.0, 1.0, 1.0, 100.0).
-    
+    linesearch_choice : int, optional
+        0 => Armijo line search
+        1 => Wolfe line search
+        2 => Strong Wolfe line search
+        (default=0, i.e., Armijo)
+
     Returns
     -------
     optimized_positions : np.ndarray
         A 2D NumPy array of shape (n_beads, 3) with the optimized coordinates.
+
+
     """
 
-    
-
-    # Determine line search type based on the number of beads and tolerance.
-    # For high particle count (>=50) and small tolerance (<1e-5), use Wolfe (choice=1).
-    # Otherwise, use Armijo (choice=0) for speed.
-    if n_beads >= 50 and tol < 1e-5:
-        chosen_ls = 1  # Wolfe line search
-    else:
-        chosen_ls = 0  # Armijo line search
-
-    # Print out which line search is chosen (for debugging/confirmation)
-    print(f"Using line search type {chosen_ls} for n_beads={n_beads} and tol={tol}")
-
+    tol = tol/10
     # 1) Flatten if needed, ensure double precision
     positions_flat = np.asarray(positions, dtype=np.float64).ravel()
 
     # 2) Create a C pointer
     c_positions = positions_flat.ctypes.data_as(ctypes.POINTER(ctypes.c_double))
 
-    # 3) Call the updated C function with the chosen line search type
+    # 3) Call the updated C function with line search choice
     lib.bfgs_optimize(
         c_positions,
         n_beads,
@@ -103,7 +93,7 @@ def optimize_protein_c(positions,
         sigma,
         b,
         k_b,
-        chosen_ls
+        linesearch_choice
     )
 
     # 4) The positions array was modified in place, so reshape to (n_beads, 3)
